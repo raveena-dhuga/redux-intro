@@ -18,3 +18,4 @@ function mapStateToProps(state) {
 }
 
 export default connect(mapStateToProps)(BalanceDisplay);
+// ^^ mapStateToProps and connect - example to show redux prior to useDispatch and useSelector hooks 

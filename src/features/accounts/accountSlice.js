@@ -23,6 +23,11 @@ const accountSlice = createSlice({
         return { payload: { amount, purpose } };
       },
 
+      // prepare the data first in cases where payload needs to be an object.
+      // Necessary because by default action creators only accept one argument as payload in RTK.
+      // Here there are two arguments e.g. requestLoan(1000, "Buy a car").
+      // Alternative is to pass in an object i.e. requestLoan({1000, "Buy a car"})?
+
       reducer(state, action) {
         if (state.loan > 0) return;
         state.loan = action.payload.amount;
@@ -32,6 +37,7 @@ const accountSlice = createSlice({
     },
     payLoan(state) {
       state.balance -= state.loan;
+      // mutating state means this line must come first otherwise the loan will be zero and there will be nothing to subtract
       state.loan = 0;
       state.loanPurpose = "";
     },
@@ -41,12 +47,20 @@ const accountSlice = createSlice({
   },
 });
 
-console.log(accountSlice);
+console.log(accountSlice); // to see the action creators and reducer created, which we then destructure + export
+
 export const { withdraw, requestLoan, payLoan } = accountSlice.actions;
+
+// destructure and export the action creators -- N.B. uses "name"/"reducer" as the action type e.g account/payLoan
+// instead of using createAsyncThunk (part of RTK, used in another project) here we will use the action creator we wrote previously. -->
+// So we removed deposit from the exports destructured from accountSlice.actions
+// The name of the action creator must be the same ("desposit") and the action type should match too "account/deposit" -->
 
 export function deposit(amount, currency) {
   if (currency === "USD") return { type: "account/deposit", payload: amount };
 
+  // By returning a function here (instead of an action object) redux will know it is the thunk and to execute the asynchronous function before dispatching the action to the store.
+  // This function gets access to dispatch fucntion and getState function (returns current state).
   return async function (dispatch, getState) {
     dispatch({ type: "account/convertingCurrency" });
     const res = await fetch(
@@ -62,6 +76,7 @@ export function deposit(amount, currency) {
 
 export default accountSlice.reducer;
 
+//  *** WITH STORE-V2 (without redux toolkit)
 // export default function accountReducer(state = initialStateAccount, action) {
 //   switch (action.type) {
 //     case "account/deposit":
@@ -113,6 +128,7 @@ export default accountSlice.reducer;
 //     dispatch({ type: "account/deposit", payload: converted });
 //   };
 // }
+
 // export function withdraw(amount) {
 //   return { type: "account/withdraw", payload: amount };
 // }

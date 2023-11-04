@@ -16,7 +16,7 @@ const customerSlice = createSlice({
           payload: {
             fullName,
             nationalID,
-            createdAt: new Date().toISOString(),
+            createdAt: new Date().toISOString(), // side effects like this should always be done in prepare method not reducer
           },
         };
       },
@@ -35,6 +35,7 @@ const customerSlice = createSlice({
 export const { createCustomer, updateName } = customerSlice.actions;
 export default customerSlice.reducer;
 
+//  *** WITH STORE-V2 (without redux toolkit)
 // export default function customerReducer(state = initialStateCustomer, action) {
 //   switch (action.type) {
 //     case "customer/createCustomer":
